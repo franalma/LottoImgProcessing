@@ -47,6 +47,7 @@ var ImageParams = {
     digit2: { x: 225, y: 35, src: '../imgs/dig_2.png' },
     digit3: { x: 265, y: 35, src: '../imgs/dig_3.png' },
     digit4: { x: 305, y: 35, src: '../imgs/dig_4.png' },
+    serie: { x_ini: 375, x_end: 400, y_ini: 55, y_end: 85 },
 };
 var ImageFiles = {
     digit0: '../imgs/dig_0.png',
@@ -61,12 +62,12 @@ var ImageFiles = {
     digit9: '../imgs/dig_9.png',
 };
 var addNumber = function (_a) {
-    var numbers = _a.numbers, serie = _a.serie;
+    var numbers = _a.numbers, serie = _a.serie, fraction = _a.fraction, price = _a.price;
     return __awaiter(void 0, void 0, void 0, function () {
         var font, callback, digitsImgs, _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
-                case 0: return [4 /*yield*/, jimp_1.default.loadFont(jimp_1.default.FONT_SANS_64_BLACK)];
+                case 0: return [4 /*yield*/, jimp_1.default.loadFont(jimp_1.default.FONT_SANS_32_BLACK)];
                 case 1:
                     font = _c.sent();
                     callback = function () { };
@@ -125,16 +126,40 @@ var addNumber = function (_a) {
                         .then(function (image) {
                         var w = image.bitmap.width;
                         var h = image.bitmap.height;
+                        var byteColorSerie = 0xff;
+                        // image.bitmap.data[ImageParams.serie.y_ini * w * 4 + ImageParams.serie.x_ini];
                         for (var y = 0; y < h; y++) {
                             for (var x = 0; x < w * 4; x++) {
+                                //Números
                                 if (x > 140 * 4 && x < 350 * 4 && y > 32 && y < 85) {
-                                    var byte = image.bitmap.data[y * w * 4 + x];
-                                    // if (byte >= 0 && byte <= 90){
                                     image.bitmap.data[y * w * 4 + x] = 0xff;
-                                    // }
+                                }
+                                //Serie
+                                if (x > ImageParams.serie.x_ini * 4 &&
+                                    x < ImageParams.serie.x_end * 4 &&
+                                    y > ImageParams.serie.y_ini &&
+                                    y < ImageParams.serie.y_end) {
+                                    if (byteColorSerie == 0xff) {
+                                        byteColorSerie = image.bitmap.data[y * w * 4 + x];
+                                        console.log("bytecolor: " + byteColorSerie);
+                                        console.log("image.bitmap.data[y * w * 4 + x]: " + image.bitmap.data[y * w * 4 + x]);
+                                    }
+                                    image.bitmap.data[y * w * 4 + x] = byteColorSerie;
+                                }
+                                //Fracción
+                                if (x > 375 * 4 && x < 400 * 4 && y > 110 && y < 130) {
+                                    var byte = image.bitmap.data[y * w * 4 + x];
+                                    image.bitmap.data[y * w * 4 + x] = 0xff;
+                                }
+                                //Precio
+                                if (x > 375 * 4 && x < 400 * 4 && y > 165 && y < 190) {
+                                    var byte = image.bitmap.data[y * w * 4 + x];
+                                    image.bitmap.data[y * w * 4 + x] = 0xff;
                                 }
                             }
                         }
+                        //print serie
+                        // image.print(font, 375, 55, serie);
                         var values = numbers.split('');
                         for (var i = 0; i < values.length; i++) {
                             var key = 'digit' + i;

@@ -6,29 +6,34 @@ const ImageParams: any = {
   digit2: { x: 225, y: 35, src: '../imgs/dig_2.png' },
   digit3: { x: 265, y: 35, src: '../imgs/dig_3.png' },
   digit4: { x: 305, y: 35, src: '../imgs/dig_4.png' },
+  serie: { x_ini: 375, x_end: 400, y_ini: 55, y_end: 85 },
 };
 
 const ImageFiles = {
-    digit0: '../imgs/dig_0.png' ,
-    digit1: '../imgs/dig_1.png' ,
-    digit2:  '../imgs/dig_2.png' ,
-    digit3: '../imgs/dig_3.png' ,
-    digit4:  '../imgs/dig_4.png', 
-    digit5:  '../imgs/dig_5.png', 
-    digit6:  '../imgs/dig_6.png',
-    digit7:  '../imgs/dig_7.png',
-    digit8: '../imgs/dig_8.png' ,
-    digit9:  '../imgs/dig_9.png' ,
+  digit0: '../imgs/dig_0.png',
+  digit1: '../imgs/dig_1.png',
+  digit2: '../imgs/dig_2.png',
+  digit3: '../imgs/dig_3.png',
+  digit4: '../imgs/dig_4.png',
+  digit5: '../imgs/dig_5.png',
+  digit6: '../imgs/dig_6.png',
+  digit7: '../imgs/dig_7.png',
+  digit8: '../imgs/dig_8.png',
+  digit9: '../imgs/dig_9.png',
 };
 
 export const addNumber = async ({
   numbers,
   serie,
+  fraction,
+  price,
 }: {
   numbers: string;
   serie: string;
+  fraction: string;
+  price: string;
 }) => {
-  let font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
+  let font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
   const callback = function () {};
   const digitsImgs: Jimp[] = [
     await Jimp.read(ImageFiles.digit0),
@@ -48,16 +53,45 @@ export const addNumber = async ({
     .then((image) => {
       const w = image.bitmap.width;
       const h = image.bitmap.height;
+      let byteColorSerie = 0xff;
+        // image.bitmap.data[ImageParams.serie.y_ini * w * 4 + ImageParams.serie.x_ini];
+
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w * 4; x++) {
+          //Números
           if (x > 140 * 4 && x < 350 * 4 && y > 32 && y < 85) {
-            let byte = image.bitmap.data[y * w * 4 + x];
-            // if (byte >= 0 && byte <= 90){
             image.bitmap.data[y * w * 4 + x] = 0xff;
-            // }
+          }
+          //Serie
+          if (
+            x > ImageParams.serie.x_ini * 4 &&
+            x < ImageParams.serie.x_end * 4 &&
+            y > ImageParams.serie.y_ini &&
+            y < ImageParams.serie.y_end
+          ) {
+            if (byteColorSerie == 0xff) {
+              byteColorSerie = image.bitmap.data[y * w * 4 + x];
+              console.log("bytecolor: "+byteColorSerie);
+              console.log("image.bitmap.data[y * w * 4 + x]: "+image.bitmap.data[y * w * 4 + x]);
+            }
+            image.bitmap.data[y * w * 4 + x] = byteColorSerie;
+          }
+
+          //Fracción
+          if (x > 375 * 4 && x < 400 * 4 && y > 110 && y < 130) {
+            let byte = image.bitmap.data[y * w * 4 + x];
+            image.bitmap.data[y * w * 4 + x] = 0xff;
+          }
+
+          //Precio
+          if (x > 375 * 4 && x < 400 * 4 && y > 165 && y < 190) {
+            let byte = image.bitmap.data[y * w * 4 + x];
+            image.bitmap.data[y * w * 4 + x] = 0xff;
           }
         }
       }
+      //print serie
+      // image.print(font, 375, 55, serie);
 
       const values = numbers.split('');
       for (let i = 0; i < values.length; i++) {
@@ -69,6 +103,7 @@ export const addNumber = async ({
           callback
         );
       }
+
       image.write('img/output.jpg');
     })
     .catch((err) => {
